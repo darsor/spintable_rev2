@@ -6,7 +6,7 @@
 
 #define TIME_PKT_SIZE       26
 #define IMU_PKT_SIZE        28
-#define CAM_PKT_SIZE        102414
+#define CAM_PKT_SIZE        76814
 #define ENC_PKT_SIZE        30
 
 #include <cstdint>
@@ -24,6 +24,8 @@ inline void endianSwap(float &f) {
 class Packet {
     public:
         Packet(const uint32_t length, const uint16_t id);
+        Packet(const Packet& that);
+        Packet& operator=(const Packet& that);
         virtual ~Packet();
         virtual void convert();
         uint32_t length;
@@ -62,7 +64,7 @@ class CameraPacket: public Packet {
     public:
         CameraPacket();
         void convert();
-        unsigned char pBuffer[102400];
+        unsigned char pBuffer[76800];
         uint32_t sysTimeSeconds;
         uint32_t sysTimeuSeconds;
 };

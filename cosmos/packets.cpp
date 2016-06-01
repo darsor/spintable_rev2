@@ -7,9 +7,21 @@ Packet::Packet(const uint32_t length, const uint16_t id):
     length(length), id(id) {
     buffer = new unsigned char[length];
 }
+Packet::Packet(const Packet& that): length(that.length), id(that.id) {
+    buffer = new unsigned char[that.length];
+}
 Packet::~Packet() {
-    printf("in Packet deconstructor\n");
     delete[] buffer;
+}
+Packet& Packet::operator=(const Packet& that) {
+    if (this != &that)
+    {
+        delete[] buffer;
+        buffer = new unsigned char[that.length];
+        length = that.length;
+        id = that.id;
+    }
+    return *this;
 }
 void Packet::convert() {}
 
@@ -77,11 +89,11 @@ void CameraPacket::convert() {
     memcpy(buffer+0, &u32, 4);
     u16 = htons(id);
     memcpy(buffer+4, &u16, 2);
-    memcpy(buffer+6, pBuffer, 102400);
+    memcpy(buffer+6, pBuffer, 76800);
     u32 = htonl(sysTimeSeconds);
-    memcpy(buffer+102406, &u32, 4);
+    memcpy(buffer+76806, &u32, 4);
     u32 = htonl(sysTimeuSeconds);
-    memcpy(buffer+102410, &u32, 4);
+    memcpy(buffer+76810, &u32, 4);
 };
 
 EncoderPacket::EncoderPacket(): Packet(ENC_PKT_SIZE, 5) {}

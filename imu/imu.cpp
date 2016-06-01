@@ -78,12 +78,12 @@ bool Imu::isFifoFilled() {
 }
 
 void Imu::fifoClear() {
-    if (!isFifoEmpty()) fifoReadBlock(NULL, fifoSize());
+    while (fifoSize() > 50) fifoReadBlock(NULL, fifoSize());
     while (!isFifoEmpty()) {
         fifoRead();
-        printf("IMU1 clear: %d remaining\n", fifoSize());
     }
     while (fifoPattern()) fifoRead();
+    printf("IMU FIFO cleared\n");
 }
 
 uint16_t Imu::fifoRead() {

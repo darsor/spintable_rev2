@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# build folder
+build
+# old spintable project
+spintable

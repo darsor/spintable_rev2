@@ -18,23 +18,15 @@ CosmosQueue::~CosmosQueue() {
 }
 
 void CosmosQueue::deleteFront() {
-    printf("starting deleteFront\n");
-    Packet* temp = queue.front();
-    printf("deleting packet\n");
-    if (temp != NULL) delete temp;
-    printf("popping packet pointer\n");
+    delete queue.front();
     queue.pop();
-    printf("deleteFront done\n");
 }
 
 void CosmosQueue::push(Packet* item) {
     push_mutex.lock();
-    printf("in push\n");
     if (queue.size() >= capacity) {
-        printf("pushing to full queue: deleting front...\n");
         deleteFront();
     }
-    printf("pushing item\n");
     queue.push(item);
     push_mutex.unlock();
 }
@@ -50,6 +42,8 @@ bool CosmosQueue::pop() {
     queue.front()->convert();
     if (cosmos.sendPacket(queue.front()->buffer, queue.front()->length) != 0) {
         connected = false;
+        push_mutex.unlock();
+        pop_mutex.unlock();
         return false;
     }
     deleteFront();
