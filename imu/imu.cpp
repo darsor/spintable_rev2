@@ -112,9 +112,9 @@ uint16_t Imu::fifoPattern() {
 }
 
 uint32_t Imu::getTimestamp() {
-    uint32_t dl = wiringPiI2CReadReg8(fdImu, LSM6DS3_TIMESTAMP2_REG);
+    uint32_t dl = wiringPiI2CReadReg8(fdImu, LSM6DS3_TIMESTAMP0_REG);
     uint32_t dm = wiringPiI2CReadReg8(fdImu, LSM6DS3_TIMESTAMP1_REG);
-    uint32_t dh = wiringPiI2CReadReg8(fdImu, LSM6DS3_TIMESTAMP0_REG);
+    uint32_t dh = wiringPiI2CReadReg8(fdImu, LSM6DS3_TIMESTAMP2_REG);
     return (((dh<<8)|dm)<<8)|dl;
 }
 
