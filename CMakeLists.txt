@@ -7,7 +7,7 @@ set (COMMON_LIBS ${EXTRA_LIBS} wiringPi)
 
 set (SENSOR_LIBS raspicam)
 
-set (MOTOR_LIBS )
+set (MOTOR_LIBS pthread)
 
 set(COMMON_SOURCES
     gps/gps.cpp
@@ -22,11 +22,11 @@ set(SENSOR_SOURCES
 )
 
 set(MOTOR_SOURCES
-    #motorpi.cpp
-    #motor/dcmotor.cpp
-    #motor/pwm.cpp
-    #motor/decoder.cpp
-    #motor/pid.cpp
+    motorpi.cpp
+    motor/dcmotor.cpp
+    motor/pwm.cpp
+    motor/decoder.cpp
+    motor/pid.cpp
 )
 
 add_executable (sensor ${COMMON_SOURCES} ${SENSOR_SOURCES})
