@@ -29,17 +29,20 @@ PI_THREAD (cameraControl) {
     camera.setHeight(240);
     camera.setFormat(RASPICAM_FORMAT_GRAY);
     if (!camera.open()) printf("ERROR: Camera not opened\n");
-    else printf("Camera opened\n");
-    usleep(3000000);
-    printf("size of buffer: %d\n", camera.getImageBufferSize());
-    while (true) {
-        cPacket = new CameraPacket();
-        camera.grab(); //TODO: timestamp before or after this?
-        systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
-        camera.retrieve(cPacket->pBuffer);
-        queue.push(cPacket);
-        usleep(80000);
+    else {
+        printf("Camera opened\n");
+        usleep(3000000);
+        printf("size of buffer: %d\n", camera.getImageBufferSize());
+        while (true) {
+            cPacket = new CameraPacket();
+            camera.grab(); //TODO: timestamp before or after this?
+            systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
+            camera.retrieve(cPacket->pBuffer);
+            queue.push(cPacket);
+            usleep(80000);
+        }
     }
+    return NULL;
 }
 
 PI_THREAD (cosmosQueue) {
