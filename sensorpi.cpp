@@ -101,9 +101,10 @@ int main() {
         if (tPacket->imuTime1 > 0xFF0000) imu1.resetTimestamp();
         if (tPacket->imuTime2 > 0xFF0000) imu2.resetTimestamp();
         queue.push(tPacket);
+        difference = 0;
 
         while (difference < 900000) { // if it's been 900ms since the GPS PPS, break out of this loop
-            //if (imu1.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
+            if (imu1.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
             while (imu1.fifoPattern()) imu1.fifoRead();
             if (imu1.fifoSize() >= 24 && imu1.fifoPattern() == 0) {
                 //printf("FIFO1 contains %d unread samples and the current pattern is %d\n", imu1.fifoSize(), imu1.fifoPattern());
@@ -124,7 +125,7 @@ int main() {
                 queue.push(iPacket);
             }
 
-            //if (imu2.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
+            if (imu2.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
             while (imu2.fifoPattern()) imu2.fifoRead();
             if (imu2.fifoSize() >= 24 && imu2.fifoPattern() == 0) {
                 //printf("FIFO2 contains %d unread samples and the current pattern is %d\n", imu2.fifoSize(), imu2.fifoPattern());
