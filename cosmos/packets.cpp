@@ -119,6 +119,6 @@ void EncoderPacket::convert() {
     f = position;
     endianSwap(f);
     memcpy(buffer+22, &f, 4);
-    u32 = htonl(rev_cnt);
-    memcpy(buffer+26, &u32, 4);
+    i32 = htonl(rev_cnt);
+    memcpy(buffer+26, &i32, 4);
 };

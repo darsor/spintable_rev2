@@ -78,7 +78,7 @@ class EncoderPacket: public Packet {
         int32_t raw_cnt;
         float motorSpeed;
         float position;
-        uint32_t rev_cnt;
+        int32_t rev_cnt;
 };
 
 #endif
