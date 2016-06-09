@@ -25,7 +25,7 @@ std::condition_variable gps_cv;
 bool gpsStart = false;
 
 // initialize GPS and its packet
-Gps gps(2, "/dev/ttyAMA0", 9600);
+Gps gps(2, "/dev/ttyS0", 9600);
 TimePacket* tPacket = NULL;
 
 // initialize COSMOS and devices
@@ -125,7 +125,7 @@ PI_THREAD (cosmosQueue) {
 int main() {
 
     // set up wiringPi
-    wiringPiSetup();
+    //wiringPiSetup();
 
     // initialize encoder and its packet
     EncoderPacket* ePacket = NULL;
@@ -160,15 +160,15 @@ int main() {
         { // wait in another thread for the GPS to return its timestamp
             std::lock_guard<std::mutex> lk(gps_m);
             gpsStart = true;
+            start.tv_sec = tPacket->sysTimeSeconds;
+            start.tv_usec = tPacket->sysTimeuSeconds; //TODO: make sure the way the GPS timestamp is read is consistent between the two systems
         } gps_cv.notify_one();
 
         // set time values for timing
-        start.tv_sec = tPacket->sysTimeSeconds;
-        start.tv_usec = tPacket->sysTimeuSeconds;
         difference = 0;
         timer = 0;
-        // every second, do this 50 times
-        for (int j=0; j<50; j++) {
+        // every second, do this 200 times
+        for (int j=0; j<200; j++) {
 
             do { // delay a bit (20ms per packet)
                 gettimeofday(&next, NULL);
@@ -179,7 +179,7 @@ int main() {
                 }
                 if (difference < timer) usleep(100);
             } while (difference < timer);
-            if (difference > 982000) break;
+            if (difference > 996000) break;
             //printf("started cycle at %li/%li\n", difference, timer);
 
             ePacket = new EncoderPacket();
@@ -187,14 +187,14 @@ int main() {
             encoder(ePacket);
             queue.push(ePacket);
 
-            timer += 20000;
+            timer += 5000;
         }
     }
     return 0;
 }
 
 void encoder(EncoderPacket* p) {
-    static const unsigned int CNT_PER_REV = 2400;
+    static const int CNT_PER_REV = 2400;
     if (p == NULL) return;
     p->motorSpeed = motor.getSpeed();
     p->position = motor.getPosition();
