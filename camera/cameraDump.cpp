@@ -12,24 +12,28 @@ using namespace raspicam;
 
 int main() {
 
-    raspicam::RaspiCam camera;
-    camera.setWidth(X_res);
-    camera.setHeight(Y_res);
-    camera.setFormat(RASPICAM_FORMAT_GRAY);
-    if (!camera.open()) printf("ERROR: Camera not opened\n");
-    else printf("Camera opened\n");
-    usleep(2000000);
-    printf("size of buffer: %d\n", camera.getImageBufferSize());
-    unsigned int bufferSize = camera.getImageBufferSize();
-    unsigned char pBuffer[bufferSize];
-    printf("taking picture...\n");
-    camera.grab();
-    camera.retrieve(pBuffer);
+    unsigned char* pBuffer;
+    unsigned int bufferSize;
+    {
+        raspicam::RaspiCam camera;
+        camera.setWidth(X_res);
+        camera.setHeight(Y_res);
+        camera.setFormat(RASPICAM_FORMAT_GRAY);
+        if (!camera.open()) printf("ERROR: Camera not opened\n");
+        else printf("Camera opened\n");
+        usleep(2000000);
+        printf("size of buffer: %d\n", camera.getImageBufferSize());
+        bufferSize = camera.getImageBufferSize();
+        pBuffer = new unsigned char[bufferSize];
+        printf("taking picture...\n");
+        camera.grab();
+        camera.retrieve(pBuffer);
+    }
 
     std::ofstream ofile("image", std::ios::binary);
     printf("file is%s open\n", ofile.is_open() ? "" : " not");
     printf("writing to file...\n");
-    ofile.write((char*) pBuffer, sizeof(pBuffer));
+    ofile.write((char*) pBuffer, bufferSize);
     ofile.close();
     std::ostringstream cmd;
     printf("converting to png...\n");
@@ -37,5 +41,6 @@ int main() {
     std::system(cmd.str().c_str());
     printf("cleaning up...\n");
     std::system("sudo rm image");
+    delete pBuffer;
     return 0;
 }

@@ -39,7 +39,6 @@ PI_THREAD (cameraControl) {
             systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
             camera.retrieve(cPacket->pBuffer);
             queue.push(cPacket);
-            usleep(80000);
         }
     }
     return NULL;
@@ -70,7 +69,7 @@ int main() {
     }
 
     // initialize devices
-    Gps gps(1, "/dev/ttyS0", 9600);
+    Gps gps(5, "/dev/ttyS0", 9600);
     Imu imu1(0x6A);
     Imu imu2(0x6B);
 
@@ -78,8 +77,7 @@ int main() {
     pid_t pid = getpid();
     std::stringstream cmd;
     cmd << "renice -n -2 -p " << pid;
-    if (pid > 0)
-        system(cmd.str().c_str());
+    if (pid > 0) system(cmd.str().c_str());
 
     FifoBlock data;
     unsigned char buffer[24];
@@ -107,11 +105,19 @@ int main() {
         difference = 0;
 
         while (difference < 900000) { // if it's been 900ms since the GPS PPS, break out of this loop
-            if (imu1.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
-            while (imu1.fifoPattern()) imu1.fifoRead();
-            if (imu1.fifoSize() >= 24 && imu1.fifoPattern() == 0) {
+            usleep(1000);
+            if (imu1.fifoSize() >= 72) {
+                if (imu1.fifoPattern() != 0) {
+                    printf("fifo 1 pattern is %d. It should be zero. restarting...\n", imu1.fifoPattern());
+                    imu1.fifoEnable(false);
+                    usleep(50);
+                    imu1.fifoEnable(true);
+                    continue;
+                }
                 //printf("FIFO1 contains %d unread samples and the current pattern is %d\n", imu1.fifoSize(), imu1.fifoPattern());
-                if (imu1.fifoReadBlock(buffer, 24) < 24) printf("PROBLEM!!! IMU1 not read correctly\n");
+                if (imu1.fifoReadBlock(buffer, 24) < 24) {
+                    printf("PROBLEM!!! IMU1 not read correctly\n");
+                }
                 //if (imu1.fifoReadBlock(buffer, 24) < 0) perror("imu1 read error");
                 iPacket = new ImuPacket(1);
                 Imu::fifoParse(buffer, data);
@@ -128,11 +134,18 @@ int main() {
                 queue.push(iPacket);
             }
 
-            if (imu2.fifoPattern() != 0) printf("PROBLEM: pattern mismatch\n");
-            while (imu2.fifoPattern()) imu2.fifoRead();
-            if (imu2.fifoSize() >= 24 && imu2.fifoPattern() == 0) {
+            if (imu2.fifoSize() >= 72) {
+                if (imu2.fifoPattern() != 0) {
+                    printf("fifo 2 pattern is %d. It should be zero. restarting...\n", imu2.fifoPattern());
+                    imu2.fifoEnable(false);
+                    usleep(50);
+                    imu2.fifoEnable(true);
+                    continue;
+                }
                 //printf("FIFO2 contains %d unread samples and the current pattern is %d\n", imu2.fifoSize(), imu2.fifoPattern());
-                if (imu2.fifoReadBlock(buffer, 24) < 24) printf("PROBLEM!!! IMU2 not read correctly\n");
+                if (imu2.fifoReadBlock(buffer, 24) < 24) {
+                    printf("PROBLEM!!! IMU2 not read correctly\n");
+                }
                 //if (imu2.fifoReadBlock(buffer, 24) < 0) perror("imu2 read error");
                 iPacket = new ImuPacket(2);
                 Imu::fifoParse(buffer, data);
@@ -148,7 +161,6 @@ int main() {
                 iPacket->ts = data.ts;
                 queue.push(iPacket);
             }
-            usleep(1000);
             gettimeofday(&end, NULL);
             difference = end.tv_usec - start.tv_usec + (end.tv_sec - start.tv_sec) * 1000000;
         }

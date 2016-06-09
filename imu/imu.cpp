@@ -59,7 +59,7 @@ Imu::~Imu() {
 
 void Imu::fifoEnable(bool state) {
     if (state) {
-        wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL5, 0x26); // enable FIFO continuous mode at 104Hz
+        wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL5, 0x21); // enable FIFO mode at 104Hz
     } else {
         wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL5, 0x00); // disable FIFO
     }
