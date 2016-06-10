@@ -19,6 +19,7 @@ int main() {
         camera.setWidth(X_res);
         camera.setHeight(Y_res);
         camera.setFormat(RASPICAM_FORMAT_GRAY);
+        camera.setShutterSpeed(1000);
         if (!camera.open()) printf("ERROR: Camera not opened\n");
         else printf("Camera opened\n");
         usleep(2000000);

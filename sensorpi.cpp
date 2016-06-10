@@ -39,6 +39,7 @@ PI_THREAD (cameraControl) {
             systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
             camera.retrieve(cPacket->pBuffer);
             queue.push(cPacket);
+            usleep(5000);
         }
     }
     return NULL;
@@ -85,11 +86,9 @@ int main() {
     long difference;
     imu1.resetTimestamp();
     imu2.resetTimestamp();
+    usleep(1000000);
     imu1.fifoEnable(true);
     imu2.fifoEnable(true);
-    usleep(1000000);
-    imu1.fifoClear();
-    imu2.fifoClear();
     while (true) {
 
         // get timestamps and send time packet
@@ -112,6 +111,7 @@ int main() {
                     imu1.fifoEnable(false);
                     usleep(50);
                     imu1.fifoEnable(true);
+                    while (imu1.fifoPattern()) imu1.fifoRead();
                     continue;
                 }
                 //printf("FIFO1 contains %d unread samples and the current pattern is %d\n", imu1.fifoSize(), imu1.fifoPattern());
@@ -140,6 +140,7 @@ int main() {
                     imu2.fifoEnable(false);
                     usleep(50);
                     imu2.fifoEnable(true);
+                    while (imu2.fifoPattern()) imu2.fifoRead();
                     continue;
                 }
                 //printf("FIFO2 contains %d unread samples and the current pattern is %d\n", imu2.fifoSize(), imu2.fifoPattern());
