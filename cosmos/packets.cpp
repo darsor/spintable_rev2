@@ -23,9 +23,9 @@ Packet& Packet::operator=(const Packet& that) {
     }
     return *this;
 }
-void Packet::convert() {}
+void Packet::convert() { printf("Virtual convert() called. That's a problem\n"); }
 
-TimePacket::TimePacket(): Packet(TIME_PKT_SIZE, 3) {}
+TimePacket::TimePacket(): Packet(TIME_PKT_SIZE, TIME_PKT_ID) {}
 
 void TimePacket::convert() {
     uint16_t u16;
@@ -80,7 +80,7 @@ void ImuPacket::convert() {
     memcpy(buffer+24,  &u32, 4);
 };
 
-CameraPacket::CameraPacket(): Packet(CAM_PKT_SIZE, 4) {}
+CameraPacket::CameraPacket(): Packet(CAM_PKT_SIZE, CAM_PKT_ID) {}
 
 void CameraPacket::convert() {
     uint16_t u16;
@@ -96,7 +96,7 @@ void CameraPacket::convert() {
     memcpy(buffer+76810, &u32, 4);
 };
 
-EncoderPacket::EncoderPacket(): Packet(ENC_PKT_SIZE, 5) {}
+EncoderPacket::EncoderPacket(): Packet(ENC_PKT_SIZE, ENC_PKT_ID) {}
 
 void EncoderPacket::convert() {
     static uint16_t u16;
@@ -122,3 +122,23 @@ void EncoderPacket::convert() {
     i32 = htonl(rev_cnt);
     memcpy(buffer+26, &i32, 4);
 };
+
+CameraPowerCmd::CameraPowerCmd() : Packet(CAM_POWER_SIZE, CAM_CMD_ID) {}
+
+void CameraPowerCmd::convert() {
+    power = ntohs(*((uint16_t*) (buffer+6)));
+}
+
+GyroResolutionCmd::GyroResolutionCmd() : Packet(GYRO_RES_SIZE, GYRO_CMD_ID) {}
+
+void GyroResolutionCmd::convert() {
+    imu = ntohs(*((uint16_t*) (buffer+6)));
+    resolution = ntohs(*((uint16_t*) (buffer+8)));
+}
+
+AccelResolutionCmd::AccelResolutionCmd() : Packet(ACCEL_RES_SIZE, ACCEL_CMD_ID) {}
+
+void AccelResolutionCmd::convert() {
+    imu = ntohs(*((uint16_t*) (buffer+6)));
+    resolution = ntohs(*((uint16_t*) (buffer+8)));
+}

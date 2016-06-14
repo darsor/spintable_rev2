@@ -134,3 +134,44 @@ void Imu::fifoParse(unsigned char* buffer, FifoBlock &block) {
     block.mz = (buffer[16] << 8) | buffer[17];
     block.ts = (((buffer[19] << 8) | buffer[18]) << 8) | buffer[21];
 }
+
+void Imu::setGyroResolution(unsigned int res) {
+    switch (res) { // 0: 125 dps; 1: 245 dps; 2: 500 dps, 3: 1000 dps; 4: 2000 dps
+        case 0:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 0x42);
+            break;
+        case 1:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 0x40);
+            break;
+        case 2:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 0x44);
+            break;
+        case 3:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 0x48);
+            break;
+        case 4:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 0x4C);
+            break;
+        default:
+            printf("setGyroResolution failed. Valid inputs are 0-4\n");
+    }
+}
+
+void Imu::setAccelResolution(unsigned int res) {
+    switch (res) { // 0: ±2 g; 1: ±4 g; 2: ±8 g, 3: ±16 g
+        case 0:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 0x40);
+            break;
+        case 1:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 0x48);
+            break;
+        case 2:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 0x4C);
+            break;
+        case 3:
+            wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 0x44);
+            break;
+        default:
+            printf("setAccelResolution failed. Valid inputs are 0-3\n");
+    }
+}

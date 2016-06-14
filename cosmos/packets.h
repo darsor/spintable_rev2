@@ -8,6 +8,18 @@
 #define IMU_PKT_SIZE        28
 #define CAM_PKT_SIZE        76814
 #define ENC_PKT_SIZE        30
+#define CAM_POWER_SIZE      8
+#define GYRO_RES_SIZE       10
+#define ACCEL_RES_SIZE      10
+
+#define IMU1_PKT_ID         1
+#define IMU2_PKT_ID         2
+#define TIME_PKT_ID         3
+#define CAM_PKT_ID          4
+#define ENC_PKT_ID          5
+#define CAM_CMD_ID          6
+#define GYRO_CMD_ID         7
+#define ACCEL_CMD_ID        8
 
 #include <cstdint>
 
@@ -79,6 +91,29 @@ class EncoderPacket: public Packet {
         float motorSpeed;
         float position;
         int32_t rev_cnt;
+};
+
+class CameraPowerCmd: public Packet {
+    public:
+        CameraPowerCmd();
+        void convert();
+        uint16_t power;
+};
+
+class GyroResolutionCmd: public Packet {
+    public:
+        GyroResolutionCmd();
+        void convert();
+        uint16_t imu;
+        uint16_t resolution;
+};
+
+class AccelResolutionCmd: public Packet {
+    public:
+        AccelResolutionCmd();
+        void convert();
+        uint16_t imu;
+        uint16_t resolution;
 };
 
 #endif

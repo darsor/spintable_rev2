@@ -108,6 +108,8 @@ class Imu {
         uint16_t fifoRead();
         int fifoReadBlock(unsigned char* buffer, int size);
         static void fifoParse(unsigned char* buffer, FifoBlock &block);
+        void setGyroResolution(unsigned int res);
+        void setAccelResolution(unsigned int res);
 
         uint16_t fifoSize();
         uint16_t fifoStatus();
