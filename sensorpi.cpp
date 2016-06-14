@@ -89,7 +89,8 @@ int main() {
         gps.timestampPPS(tPacket->sysTimeSeconds, tPacket->sysTimeuSeconds);
         tPacket->imuTime1 = imu1.getTimestamp();
         tPacket->imuTime2 = imu2.getTimestamp();
-        gettimeofday(&start, nullptr);
+        start.tv_sec = tPacket->sysTimeSeconds;
+        start.tv_usec = tPacket->sysTimeuSeconds;
         tPacket->gpsTime = gps.getTime(); //TODO: this might delay: put in other thread?
         if (tPacket->imuTime1 > 0xFF0000) imu1.resetTimestamp();
         if (tPacket->imuTime2 > 0xFF0000) imu2.resetTimestamp();

@@ -31,3 +31,7 @@
 build
 # old spintable project
 spintable
+# camera junk
+camera/out.png
+camera/take_picture
+camera/take_picture_hires

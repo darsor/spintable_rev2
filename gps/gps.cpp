@@ -41,7 +41,7 @@ Gps::Gps(int ppsPin, std::string device, int baud): ppsPin(ppsPin) {
     // set high priority for this thread
     pid_t pid = getpid();
     std::stringstream cmd;
-    cmd << "renice -n -2 -p " << pid;
+    cmd << "renice -n -3 -p " << pid;
     if (pid > 0)
         system(cmd.str().c_str());
     wiringPiISR(ppsPin, INT_EDGE_RISING, &ppsISR);

@@ -4,22 +4,32 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
-#define TIME_PKT_SIZE       26
-#define IMU_PKT_SIZE        28
-#define CAM_PKT_SIZE        76814
-#define ENC_PKT_SIZE        30
-#define CAM_POWER_SIZE      8
-#define GYRO_RES_SIZE       10
-#define ACCEL_RES_SIZE      10
+#define TIME_PKT_SIZE           26
+#define IMU_PKT_SIZE            28
+#define CAM_PKT_SIZE            76814
+#define ENC_PKT_SIZE            30
+#define CAM_POWER_SIZE          8
+#define GYRO_RES_SIZE           10
+#define ACCEL_RES_SIZE          10
+#define MOTOR_SET_HOME_SIZE     6
+#define MOTOR_SET_SPEED_SIZE    8
+#define MOTOR_ABS_POS_SIZE      10
+#define MOTOR_REV_POS_SIZE      10
+#define MOTOR_GOTO_INDEX_SIZE   6
 
-#define IMU1_PKT_ID         1
-#define IMU2_PKT_ID         2
-#define TIME_PKT_ID         3
-#define CAM_PKT_ID          4
-#define ENC_PKT_ID          5
-#define CAM_CMD_ID          6
-#define GYRO_CMD_ID         7
-#define ACCEL_CMD_ID        8
+#define IMU1_PKT_ID             1
+#define IMU2_PKT_ID             2
+#define TIME_PKT_ID             3
+#define CAM_PKT_ID              4
+#define ENC_PKT_ID              5
+#define CAM_CMD_ID              6
+#define GYRO_CMD_ID             7
+#define ACCEL_CMD_ID            8
+#define MOTOR_SET_HOME_ID       9
+#define MOTOR_SET_SPEED_ID      10
+#define MOTOR_ABS_POS_ID        11
+#define MOTOR_REV_POS_ID        12
+#define MOTOR_GOTO_INDEX_ID     13
 
 #include <cstdint>
 
@@ -114,6 +124,27 @@ class AccelResolutionCmd: public Packet {
         void convert();
         uint16_t imu;
         uint16_t resolution;
+};
+
+class SetSpeedCmd: public Packet {
+    public:
+        SetSpeedCmd();
+        void convert();
+        int16_t speed;
+};
+
+class SetAbsPosCmd: public Packet {
+    public:
+        SetAbsPosCmd();
+        void convert();
+        float position;
+};
+
+class SetRevPosCmd: public Packet {
+    public:
+        SetRevPosCmd();
+        void convert();
+        float position;
 };
 
 #endif

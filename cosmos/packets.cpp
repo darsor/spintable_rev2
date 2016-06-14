@@ -142,3 +142,23 @@ void AccelResolutionCmd::convert() {
     imu = ntohs(*((uint16_t*) (buffer+6)));
     resolution = ntohs(*((uint16_t*) (buffer+8)));
 }
+
+SetSpeedCmd::SetSpeedCmd() : Packet(MOTOR_SET_SPEED_SIZE, MOTOR_SET_SPEED_ID) {}
+
+void SetSpeedCmd::convert() {
+    speed = ntohs(*((int16_t*) (buffer+6)));
+}
+
+SetAbsPosCmd::SetAbsPosCmd() : Packet(MOTOR_ABS_POS_SIZE, MOTOR_ABS_POS_ID) {}
+
+void SetAbsPosCmd::convert() {
+    position = *((float*) (buffer+6));
+    endianSwap(position);
+}
+
+SetRevPosCmd::SetRevPosCmd() : Packet(MOTOR_REV_POS_SIZE, MOTOR_REV_POS_ID) {}
+
+void SetRevPosCmd::convert() {
+    position = *((float*) (buffer+6));
+    endianSwap(position);
+}
