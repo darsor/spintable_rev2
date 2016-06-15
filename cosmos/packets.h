@@ -16,6 +16,7 @@
 #define MOTOR_ABS_POS_SIZE      10
 #define MOTOR_REV_POS_SIZE      10
 #define MOTOR_GOTO_INDEX_SIZE   6
+#define CMD_IMU_RESET_SIZE      8
 
 #define IMU1_PKT_ID             1
 #define IMU2_PKT_ID             2
@@ -30,6 +31,7 @@
 #define MOTOR_ABS_POS_ID        11
 #define MOTOR_REV_POS_ID        12
 #define MOTOR_GOTO_INDEX_ID     13
+#define CMD_IMU_RESET_ID        14
 
 #include <cstdint>
 
@@ -145,6 +147,13 @@ class SetRevPosCmd: public Packet {
         SetRevPosCmd();
         void convert();
         float position;
+};
+
+class CmdImuReset: public Packet {
+    public:
+        CmdImuReset();
+        void convert();
+        uint16_t imu;
 };
 
 #endif

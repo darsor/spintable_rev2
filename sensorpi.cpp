@@ -94,7 +94,7 @@ int main() {
         tPacket->gpsTime = gps.getTime(); //TODO: this might delay: put in other thread?
         if (tPacket->imuTime1 > 0xFF0000) imu1.resetTimestamp();
         if (tPacket->imuTime2 > 0xFF0000) imu2.resetTimestamp();
-        printf("pushed time packet with gpstime %f\n", tPacket->gpsTime);
+        //printf("pushed time packet with gpstime %f\n", tPacket->gpsTime);
         queue.push_tlm(tPacket);
         difference = 0;
 
@@ -192,6 +192,25 @@ int main() {
                             if (accelCmd->imu == 1) imu1.setAccelResolution(accelCmd->resolution);
                             if (accelCmd->imu == 2) imu2.setAccelResolution(accelCmd->resolution);
                             printf("set IMU%u accel resolution to %u\n", accelCmd->imu, accelCmd->resolution);
+                        }
+                        break;
+                    case CMD_IMU_RESET_ID:
+                        {
+                            CmdImuReset* resetCmd = static_cast<CmdImuReset*>(cmdPacket);
+                            resetCmd->CmdImuReset::convert();
+                            if (resetCmd->imu == 1) {
+                                imu1.fifoEnable(false);
+                                imu1.reset();
+                                usleep(100000);
+                                imu1.fifoEnable(true);
+                                printf("IMU%u reset\n", resetCmd->imu);
+                            } else if (resetCmd->imu == 2) {
+                                imu2.fifoEnable(false);
+                                imu2.reset();
+                                usleep(100000);
+                                imu2.fifoEnable(true);
+                                printf("IMU%u reset\n", resetCmd->imu);
+                            } else printf("IMU%u not reset\n", resetCmd->imu);
                         }
                         break;
                     default:

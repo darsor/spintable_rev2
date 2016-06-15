@@ -6,17 +6,30 @@
 #include <unistd.h> // for usleep() and read()
 #include <stdio.h> // for printf
 
-Imu::Imu(int addr) {
-    fdImu = wiringPiI2CSetup(addr);
+Imu::Imu(int addr) : address(addr) {
+    fdImu = wiringPiI2CSetup(address);
     if (fdImu < 0) {
         printf("IMU not connected, exiting...\n");
         exit(1);
     }
+    initialize();
+}
+
+Imu::~Imu() {
+    close(fdImu);
+    close(fdMag);
+}
+
+void Imu::reset() {
+    initialize();
+}
+
+void Imu::initialize() {
 
     // software reset to ensure that everything is at defaults
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 		0x00); // turn off gyroscope
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL3_C, 		0x05); // software reset
-    usleep(200);
+    usleep(500);
 
     // enable pass-through to set up magnetometer
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_MASTER_CONFIG, 	0x04); // enable pass-through mode
@@ -51,10 +64,6 @@ Imu::Imu(int addr) {
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 		0x40); // turn on accelerometer at 104Hz
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 		0x40); // turn on gyroscope at 104Hz
     usleep(10000);
-}
-
-Imu::~Imu() {
-    close(fdImu); //TODO: also close MAG?
 }
 
 void Imu::fifoEnable(bool state) {

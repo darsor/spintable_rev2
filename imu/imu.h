@@ -98,6 +98,7 @@ class Imu {
     public:
         Imu(int addr);
         ~Imu();
+        void reset();
 
         void fifoEnable(bool state);
         bool isFifoEmpty();
@@ -120,6 +121,9 @@ class Imu {
 
     private:
         int fdImu, fdMag;
+        int address;
+
+        void initialize();
 };
 
 #endif

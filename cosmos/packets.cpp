@@ -162,3 +162,9 @@ void SetRevPosCmd::convert() {
     position = *((float*) (buffer+6));
     endianSwap(position);
 }
+
+CmdImuReset::CmdImuReset() : Packet(CMD_IMU_RESET_SIZE, CMD_IMU_RESET_ID) {}
+
+void CmdImuReset::convert() {
+    imu = ntohs(*((uint16_t*) (buffer+6)));
+}
