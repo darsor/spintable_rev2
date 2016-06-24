@@ -67,26 +67,26 @@ void DCMotor::run(int command) {
 }
 
 void DCMotor::setSpeed(int speed) {
-	if (speed < -255) speed = -255;
-	if (speed > 255) speed = 255;
+	if (speed < -4095) speed = -4095;
+	if (speed > 4095) speed = 4095;
     if (speed == 0) {
         run(RELEASE);
     } else if (speed > 0) {
         run(BACKWARD);
-        pwm.setPWM(pwmPin, 0, speed * 16);
+        pwm.setPWM(pwmPin, 0, speed);
     } else if (speed < 0) {
         run(FORWARD);
-        pwm.setPWM(pwmPin, 0, abs(speed) * 16);
+        pwm.setPWM(pwmPin, 0, abs(speed));
     }
     pwmSpeed = speed;
 }
 
 void DCMotor::setGradSpeed(int speed) {
     stopPID();
-    if (speed > 255 ) {
-        speed = 255;
-    } else if (speed < -255) {
-        speed = -255;
+    if (speed > 4095) {
+        speed = 4095;
+    } else if (speed < -4095) {
+        speed = -4095;
     }
     //printf("speed changing from %d to %d\n", pwmSpeedOld, speed);
 
@@ -96,7 +96,7 @@ void DCMotor::setGradSpeed(int speed) {
     for (int i=pwmSpeedOld; i != speed ; i += inc) {
         //printf("old speed: %d, current speed: %d, new speed: %d\n", pwmSpeedOld, i, speed);
         setSpeed(i);
-        usleep(6000);
+        usleep(150);
     }
     setSpeed(speed);
     pwmSpeedOld = speed;
@@ -170,30 +170,33 @@ void DCMotor::gotoIndex() {
 }
 
 double DCMotor::getSpeed() {
+    static const unsigned int samples = 5;
     static bool initialized = false;
     static struct timeval timeVal;
-    static struct timezone timeZone;
     static unsigned int i;
-    static double times[4];
-    static int32_t ticks[4];
+    static double times[samples]; // timestamps of encoder counds
+    static double diffs[samples]; // diferences between ticks
+    static int32_t ticks[samples]; // encoder counts
+    speed_mutex.lock();
+    gettimeofday(&timeVal, nullptr);
     if (!initialized) { // the first time, populate these arrays
-        for (int j=0; j<4; j++) {
-            gettimeofday(&timeVal, &timeZone);
+        for (unsigned int j=0; j<samples; j++) {
+            gettimeofday(&timeVal, nullptr);
             times[j] =  timeVal.tv_sec + (timeVal.tv_usec/1000000.0);
             ticks[j] = decoder.readCntr();
+            diffs[j] = 0;
             usleep(5000);
         }
         initialized = true;
     }
-    speed_mutex.lock();
-    gettimeofday(&timeVal, &timeZone);
     times[i] =  timeVal.tv_sec + (timeVal.tv_usec/1000000.0);
     ticks[i] = decoder.readCntr();
+    // simple low-pass filtered tick differences
+    diffs[i] = 0.20 * (ticks[i] - ticks[(i+1)%samples]) + 0.80 * diffs[(i-1+samples)%samples];
 
-    degSpeed = ( (ticks[i] - ticks[(i+1)%4]) /
-                 (times[i] - times[(i+1)%4]) ) * DEG_PER_CNT;
+    degSpeed = ( diffs[i] / (times[i] - times[(i+1)%samples]) ) * DEG_PER_CNT;
 
-    if (++i > 3) i = 0;
+    if (++i > samples-1) i = 0;
     speed_mutex.unlock();
 
     return degSpeed;
@@ -217,10 +220,11 @@ int32_t DCMotor::getCnt() {
 
 void DCMotor::posPID() {
     printf("starting pid for position %f\n", setPos);
-    PID pid(0.01, 0.6, 0, 0);
+    //PID pid(0.01, 14, 0, 0);
+    PID pid(0.01, 15, 0, 0); // with no mass
     pid.setDampening(-0.075, 0.075);
     pid.setRollover(0, 360);
-    pid.setDeadzone(-15, 15);
+    pid.setDeadzone(-260, 260);
     double output;
     while (runningPID.load()) {
         pid.update(setPos, getPosition());
@@ -234,8 +238,9 @@ void DCMotor::posPID() {
 
 void DCMotor::speedPID() {
     printf("starting pid for speed %f\n", setSpd);
-    PID pid(0.02, 0.01, 0.004, 0);
-    pid.setLimits(-20, 20);
+    PID pid(0.01, 0.2, 0, 0);
+    //pid.setLimits(-10, 10);
+    pid.setDeadzone(-1, 1);
     //pid.setDampening(-0.08, 0.08);
     double output;
     while (runningPID.load()) {
@@ -245,7 +250,7 @@ void DCMotor::speedPID() {
         //printf("pwmSpeed: %d    ", pwmSpeed);
         //setSpeed((int) pid.getOutput() + pwmSpeed);
         //printf("setPoint: %-.4f, proccessValue: %-.4f, output: %-.4f    ", setSpd, getSpeed(), output);
-        usleep(20000);
+        usleep(10000);
     }
 }
 
