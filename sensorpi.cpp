@@ -86,6 +86,7 @@ int main() {
 
         // get timestamps and send time packet
         tPacket = new TimePacket();
+        while (!gps.dataAvail()) usleep(100);
         gps.timestampPPS(tPacket->sysTimeSeconds, tPacket->sysTimeuSeconds);
         tPacket->imuTime1 = imu1.getTimestamp();
         tPacket->imuTime2 = imu2.getTimestamp();
