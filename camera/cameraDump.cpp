@@ -1,5 +1,9 @@
-#define X_res   1280
-#define Y_res   960
+//#define X_res   320
+//#define X_res   1280
+#define X_res     2592 
+//#define Y_res   240
+//#define Y_res   960
+#define Y_res     1944
 
 #include <raspicam/raspicam.h>
 #include <unistd.h>
@@ -19,7 +23,10 @@ int main() {
         camera.setWidth(X_res);
         camera.setHeight(Y_res);
         camera.setFormat(RASPICAM_FORMAT_GRAY);
-        camera.setShutterSpeed(1000);
+        camera.setHorizontalFlip(true);
+        camera.setVerticalFlip(true);
+        //camera.setContrast(100);
+        //camera.setShutterSpeed(1000); // microseconds
         if (!camera.open()) printf("ERROR: Camera not opened\n");
         else printf("Camera opened\n");
         usleep(2000000);

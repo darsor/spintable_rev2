@@ -98,7 +98,7 @@ int main() {
         queue.push_tlm(tPacket);
         difference = 0;
 
-        while (difference < 900000) { // if it's been 900ms since the GPS PPS, break out of this loop
+        while (difference < 975000) { // if it's been 900ms since the GPS PPS, break out of this loop
             usleep(1000);
 
             if (imu1.fifoSize() >= 72) {
