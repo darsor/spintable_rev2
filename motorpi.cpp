@@ -48,6 +48,7 @@ PI_THREAD (motorControl) {
                         SetSpeedCmd* speedCmd = static_cast<SetSpeedCmd*>(cmdPacket);
                         speedCmd->SetSpeedCmd::convert();
                         printf("received command to change speed to %d\n", speedCmd->speed);
+                        //motor.pidSpeed(speedCmd->speed);
                         motor.setGradSpeed(speedCmd->speed);
                     }
                     break;
@@ -111,10 +112,12 @@ int main() {
     // these values help time the packets
     long timer = 0, difference = 0;
     struct timeval start, next;
+    usleep(1000000);
     while (true) {
 
         // get timestamps and send time packet
         tPacket = new TimePacket();
+        while (!gps.dataAvail()) usleep(100);
         gps.timestampPPS(tPacket->sysTimeSeconds, tPacket->sysTimeuSeconds);
         start.tv_sec = tPacket->sysTimeSeconds;
         start.tv_usec = tPacket->sysTimeuSeconds;
