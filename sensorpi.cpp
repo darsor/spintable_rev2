@@ -33,22 +33,26 @@ PI_THREAD (cameraControl) {
     camera.setWidth(320);
     camera.setHeight(240);
     camera.setFormat(RASPICAM_FORMAT_GRAY);
-    if (!camera.open()) printf("ERROR: Camera not opened\n");
-    else {
-        printf("Camera opened\n");
-        usleep(3000000);
-        while (true) {
-            if (camera_state.load()) {
-                cPacket = new CameraPacket();
-                camera.grab(); //TODO: timestamp before or after this?
-                systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
-                camera.retrieve(cPacket->pBuffer);
-                queue.push_tlm(cPacket);
-                usleep(5000);
-            } else {
-                std::unique_lock<std::mutex> lk(camera_mutex);
-                camera_cv.wait(lk, []{return camera_state.load();});
+    camera.setHorizontalFlip(true);
+    camera.setVerticalFlip(true);
+    while (true) {
+        if (camera_state.load()) {
+            cPacket = new CameraPacket();
+            camera.grab(); //TODO: timestamp before or after this?
+            systemTimestamp(cPacket->sysTimeSeconds, cPacket->sysTimeuSeconds);
+            camera.retrieve(cPacket->pBuffer);
+            queue.push_tlm(cPacket);
+            usleep(5000);
+        } else {
+            camera.release();
+            std::unique_lock<std::mutex> lk(camera_mutex);
+            camera_cv.wait(lk, []{return camera_state.load();});
+            if (!camera.open()) {
+                printf("ERROR: Camera not opened\n");
+                return nullptr;
             }
+            printf("Camera opened\n");
+            usleep(2500000);
         }
     }
     return nullptr;
