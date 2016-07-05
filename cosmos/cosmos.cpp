@@ -29,7 +29,7 @@ void Cosmos::cosmosConnect() {
     bindSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (bindSocket<0) {
         perror("ERROR opening socket");
-        return;
+        exit(1);
     }
 
     // clear and set up server address structure
@@ -41,7 +41,7 @@ void Cosmos::cosmosConnect() {
     // bind socket
     if (bind(bindSocket, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         perror("ERROR on binding");
-        return;
+        exit(1);
     }
 
     // listen on socket
