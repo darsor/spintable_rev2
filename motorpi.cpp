@@ -26,11 +26,11 @@ bool gpsStart = false;
 
 // initialize GPS and its packet
 Gps gps(2, "/dev/ttyS0", 9600);
-TimePacket* tPacket = nullptr;
+MotorTimePacket* tPacket = nullptr;
 
 // initialize COSMOS and devices
 // these are global so that all threads can access them
-CosmosQueue queue(4810, 128, 8);
+CosmosQueue queue(4810, 1200000, 8);
 DCMotor motor(2, 0x60, 1600);
 
 PI_THREAD (motorControl) {
@@ -116,7 +116,7 @@ int main() {
     while (true) {
 
         // get timestamps and send time packet
-        tPacket = new TimePacket();
+        tPacket = new MotorTimePacket();
         while (!gps.dataAvail()) usleep(100);
         gps.timestampPPS(tPacket->sysTimeSeconds, tPacket->sysTimeuSeconds);
         start.tv_sec = tPacket->sysTimeSeconds;
@@ -125,17 +125,18 @@ int main() {
         queue.push_tlm(tPacket);
         difference = 0;
         timer = 0;
+        //printf("tlm queue size: %u\n", queue.tlmSize());
 
-        // every second, do this 200 times
-        for (int j=0; j<200; j++) {
+        // every second, do this 20000 times
+        for (int j=0; j<5000; j++) {
 
             // synchronize the packets
             do {
                 gettimeofday(&next, nullptr);
                 difference = next.tv_usec - start.tv_usec + (next.tv_sec - start.tv_sec) * 1000000;
-                if (difference < timer) usleep(100);
+                if (difference < timer) usleep(5);
             } while (difference < timer);
-            if (difference > 996000) break;
+            if (difference > 999800) break; // TODO: tune this
 
             //printf("started cycle at %li/%li\n", difference, timer);
 
@@ -144,19 +145,15 @@ int main() {
             encoder(ePacket);
             queue.push_tlm(ePacket);
 
-            timer += 5000;
+            timer += 200;
         }
     }
     return 0;
 }
 
 void encoder(EncoderPacket* p) {
-    static const int CNT_PER_REV = 2400;
     if (p == nullptr) return;
-    p->motorSpeed = motor.getSpeed();
-    p->position = motor.getPosition();
-    p->raw_cnt = motor.getCnt();
-    p->rev_cnt = p->raw_cnt / CNT_PER_REV;
+    p->raw_cnt = motor.updateCnt();
 }
 
 void systemTimestamp(uint32_t &stime, uint32_t &ustime) {

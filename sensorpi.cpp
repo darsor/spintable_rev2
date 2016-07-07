@@ -17,7 +17,7 @@ using namespace raspicam;
 void systemTimestamp(uint32_t &stime, uint32_t &ustime);
 
 // initialize packets
-TimePacket* tPacket = nullptr;
+SensorTimePacket* tPacket = nullptr;
 ImuPacket* iPacket = nullptr;
 
 // make the CosmosQueue global (so that all threads can access it)
@@ -89,7 +89,7 @@ int main() {
     while (true) {
 
         // get timestamps and send time packet
-        tPacket = new TimePacket();
+        tPacket = new SensorTimePacket();
         while (!gps.dataAvail()) usleep(100);
         gps.timestampPPS(tPacket->sysTimeSeconds, tPacket->sysTimeuSeconds);
         tPacket->imuTime1 = imu1.getTimestamp();

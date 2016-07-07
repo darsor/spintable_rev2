@@ -4,10 +4,11 @@
 #ifndef PACKETS_H
 #define PACKETS_H
 
-#define TIME_PKT_SIZE           26
+#define MOTOR_TIME_PKT_SIZE     18
+#define SENSOR_TIME_PKT_SIZE    26
 #define IMU_PKT_SIZE            28
 #define CAM_PKT_SIZE            76814
-#define ENC_PKT_SIZE            30
+#define ENC_PKT_SIZE            18
 #define CAM_POWER_SIZE          8
 #define GYRO_RES_SIZE           10
 #define ACCEL_RES_SIZE          10
@@ -20,7 +21,7 @@
 
 #define IMU1_PKT_ID             1
 #define IMU2_PKT_ID             2
-#define TIME_PKT_ID             3
+#define MOTOR_TIME_PKT_ID       3
 #define CAM_PKT_ID              4
 #define ENC_PKT_ID              5
 #define CAM_CMD_ID              6
@@ -32,6 +33,7 @@
 #define MOTOR_REV_POS_ID        12
 #define MOTOR_GOTO_INDEX_ID     13
 #define CMD_IMU_RESET_ID        14
+#define SENSOR_TIME_PKT_ID      15
 
 #include <cstdint>
 
@@ -57,9 +59,18 @@ class Packet {
         unsigned char* buffer;
 };
 
-class TimePacket: public Packet {
+class MotorTimePacket: public Packet {
     public:
-        TimePacket();
+        MotorTimePacket();
+        void convert();
+        float gpsTime;
+        uint32_t sysTimeSeconds;
+        uint32_t sysTimeuSeconds;
+};
+
+class SensorTimePacket: public Packet {
+    public:
+        SensorTimePacket();
         void convert();
         float gpsTime;
         uint32_t imuTime1;
@@ -100,9 +111,6 @@ class EncoderPacket: public Packet {
         uint32_t sysTimeSeconds;
         uint32_t sysTimeuSeconds;
         int32_t raw_cnt;
-        float motorSpeed;
-        float position;
-        int32_t rev_cnt;
 };
 
 class CameraPowerCmd: public Packet {
