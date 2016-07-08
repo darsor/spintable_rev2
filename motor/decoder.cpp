@@ -10,11 +10,11 @@ std::mutex rw_mutex;
 
 // decoder constructor
 Decoder::Decoder(){
-    if (wiringPiSPISetup(0,1000000) < 0)
+    if (wiringPiSPISetup(0,2000000) < 0)
         perror("ERROR opening device");
     rw_mutex.lock();
     data[0]=0x88; // hexadecimal codes required for Decoder setup
-    data[1]=0x01;
+    data[1]=0x03;
     wiringPiSPIDataRW(0, data, 2);//writes to the spi device.
     rw_mutex.unlock();
     //clearCntr();
@@ -33,16 +33,12 @@ void Decoder::clearCntr(){
 // the data because of the way SPI works
 int32_t Decoder::readCntr(){
     rw_mutex.lock();
-    data[0]=0x60; 
-    data[1]=0x00;
-    data[2]=0x00;
-    data[3]=0x00;
-    data[4]=0x00;
 
+    data[0]=0x60; 
     wiringPiSPIDataRW(0, data, 5);
 
-    int32_t count  = ((int32_t) data[1] << 24) + ((int32_t) data[2] << 16);
-    count += ((int32_t) data[3] << 8)  +  (int32_t) data[4];
+    int32_t count  = ((int32_t) data[1] << 24) + ((int32_t) data[2] << 16) +
+                     ((int32_t) data[3] << 8)  + ((int32_t) data[4]);
     rw_mutex.unlock();
 
     return count; 

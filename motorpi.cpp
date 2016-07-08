@@ -125,10 +125,10 @@ int main() {
         queue.push_tlm(tPacket);
         difference = 0;
         timer = 0;
-        //printf("tlm queue size: %u\n", queue.tlmSize());
+        printf("tlm queue size: %u\n", queue.tlmSize());
 
         // every second, do this 20000 times
-        for (int j=0; j<5000; j++) {
+        for (int j=0; j<20000; j++) {
 
             // synchronize the packets
             do {
@@ -145,7 +145,7 @@ int main() {
             encoder(ePacket);
             queue.push_tlm(ePacket);
 
-            timer += 200;
+            timer += 50;
         }
     }
     return 0;
