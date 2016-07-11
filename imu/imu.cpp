@@ -39,13 +39,13 @@ void Imu::initialize() {
         exit(1);
     }
     wiringPiI2CWriteReg8(fdMag, HMC5883L_CONFIG_REG_A, 	0x18); // set the HMC5883L to output data at 75Hz
-    wiringPiI2CWriteReg8(fdMag, HMC5883L_MODE, 		    0x00); // enable continuous mode
+    wiringPiI2CWriteReg8(fdMag, HMC5883L_MODE, 		    0x01); // enable single measurement mode
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_MASTER_CONFIG, 	0x00); // disable the pass-through on the LSM6DS3
 
     // set up FIFO
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_WAKE_UP_DUR,    0x10); // set timestamp to high resolution (25μs)
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_TAP_CFG,        0x80); // enable the IMU timestamp
-    wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL1,     0xE0); // set watermark level at 102 samples
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL1,     0xE0); // set watermark level at 104 samples
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL2,     0x84); // enable timestamp as 4th FIFO data set
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL3,     0x09); // enable accel and gryo data in FIFO
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_FIFO_CTRL4,     0x09); // enable timestamp/sensorhub data in FIFO
@@ -53,17 +53,22 @@ void Imu::initialize() {
     // set up sensorhub
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL3_C,        0x44); // enable block data update
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_FUNC_CFG_ACCESS,0x80); // enable access to slave config registers
-    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV0_ADD, 	    0x3D); // give HMC5883L address to LSM6DS3
-    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV0_SUBADD, 	HMC5883L_RA_DATAX_H); // first data register of HMC5883L
-    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLAVE0_CONFIG, 	0x06); // there are 6 data output registers
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV0_ADD, 	    0x3C); // give HMC5883L address to LSM6DS3 (write)
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV0_SUBADD, 	HMC5883L_MODE); // mode register (to make another measurement)
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLAVE0_CONFIG, 	0x10); // there are 2 sensors configured (one write, one read)
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_DATAWRITE_SLV0, 0x01); // single measurement on HMC5883L
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV1_ADD, 	    0x3D); // give HMC5883L address to LSM6DS3 (read)
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLV1_SUBADD, 	HMC5883L_RA_DATAX_H); // first data output register
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_SLAVE1_CONFIG, 	0x06); // there are 6 data registers to read
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_FUNC_CFG_ACCESS,0x00); // disable access to slave config registers
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL10_C, 		0x3C); // enable the sensor hub on LSM6DS3
-    wiringPiI2CWriteReg8(fdImu, LSM6DS3_MASTER_CONFIG, 	0x09); // enable I2C master interface
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_MASTER_CONFIG, 	0x01); // enable I2C master interface
 
     // turn on accelerometer and gyroscope
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL1_XL, 		0x40); // turn on accelerometer at 104Hz
     wiringPiI2CWriteReg8(fdImu, LSM6DS3_CTRL2_G, 		0x40); // turn on gyroscope at 104Hz
-    usleep(10000);
+    usleep(100000);
+    wiringPiI2CWriteReg8(fdImu, LSM6DS3_MASTER_CONFIG, 	0x11); // use drdy on int2 for external magnetometer
 }
 
 void Imu::fifoEnable(bool state) {
@@ -87,7 +92,7 @@ bool Imu::isFifoFilled() {
 }
 
 void Imu::fifoClear() {
-    while (fifoSize() > 50) fifoReadBlock(NULL, fifoSize());
+    while (fifoSize() > 50) fifoReadBlock(nullptr, fifoSize());
     while (!isFifoEmpty()) {
         fifoRead();
     }
