@@ -129,8 +129,8 @@ void CosmosQueue::tlm_thread() {
 
 void CosmosQueue::cmd_thread() {
     unsigned char buffer[128];
-    uint32_t length;
-    uint16_t id;
+    uint32_t length, u32;
+    uint16_t id, u16;
     Packet* cmd;
     while (true) {
         connection_mutex.lock();
@@ -142,7 +142,8 @@ void CosmosQueue::cmd_thread() {
                 usleep(100000);
                 continue;
             } else {
-                length = ntohl(*((uint32_t*)buffer));
+                memcpy(&u32, buffer, sizeof(u32));
+                length = ntohl(u32);
                 if (length <= 4) continue;
                 // receive the rest of the packet
                 if (cosmos.recvPacket(buffer+4, length-4) < (int)(length-4)) {
@@ -150,7 +151,8 @@ void CosmosQueue::cmd_thread() {
                     continue;
                 }
                 // get the id to know what command it is
-                id = ntohs(*((uint16_t*)(buffer+4)));
+                memcpy(&u16, buffer+4, sizeof(u16));
+                id = ntohs(u16);
                 cmd = new Packet(length, id);
                 memcpy(cmd->buffer, buffer, length);
                 push_cmd(cmd);

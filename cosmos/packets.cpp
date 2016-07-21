@@ -136,45 +136,57 @@ void EncoderPacket::convert() {
 CameraPowerCmd::CameraPowerCmd() : Packet(CAM_POWER_SIZE, CAM_CMD_ID) {}
 
 void CameraPowerCmd::convert() {
-    power = ntohs(*((uint16_t*) (buffer+6)));
+    static uint16_t u16;
+    memcpy(&u16, buffer+6, sizeof(u16));
+    power = ntohs(u16);
 }
 
 GyroResolutionCmd::GyroResolutionCmd() : Packet(GYRO_RES_SIZE, GYRO_CMD_ID) {}
 
 void GyroResolutionCmd::convert() {
-    imu = ntohs(*((uint16_t*) (buffer+6)));
-    resolution = ntohs(*((uint16_t*) (buffer+8)));
+    static uint16_t u16;
+    memcpy(&u16, buffer+6, sizeof(u16));
+    imu = ntohs(u16);
+    memcpy(&u16, buffer+8, sizeof(u16));
+    resolution = ntohs(u16);
 }
 
 AccelResolutionCmd::AccelResolutionCmd() : Packet(ACCEL_RES_SIZE, ACCEL_CMD_ID) {}
 
 void AccelResolutionCmd::convert() {
-    imu = ntohs(*((uint16_t*) (buffer+6)));
-    resolution = ntohs(*((uint16_t*) (buffer+8)));
+    static uint16_t u16;
+    memcpy(&u16, buffer+6, sizeof(u16));
+    imu = ntohs(u16);
+    memcpy(&u16, buffer+8, sizeof(u16));
+    resolution = ntohs(u16);
 }
 
 SetSpeedCmd::SetSpeedCmd() : Packet(MOTOR_SET_SPEED_SIZE, MOTOR_SET_SPEED_ID) {}
 
 void SetSpeedCmd::convert() {
-    speed = ntohs(*((int16_t*) (buffer+6)));
+    static uint16_t u16;
+    memcpy(&u16, buffer+6, sizeof(u16));
+    speed = ntohs(u16);
 }
 
 SetAbsPosCmd::SetAbsPosCmd() : Packet(MOTOR_ABS_POS_SIZE, MOTOR_ABS_POS_ID) {}
 
 void SetAbsPosCmd::convert() {
-    position = *((float*) (buffer+6));
+    memcpy(&position, buffer+6, sizeof(position));
     endianSwap(position);
 }
 
 SetRevPosCmd::SetRevPosCmd() : Packet(MOTOR_REV_POS_SIZE, MOTOR_REV_POS_ID) {}
 
 void SetRevPosCmd::convert() {
-    position = *((float*) (buffer+6));
+    memcpy(&position, buffer+6, sizeof(position));
     endianSwap(position);
 }
 
 CmdImuReset::CmdImuReset() : Packet(CMD_IMU_RESET_SIZE, CMD_IMU_RESET_ID) {}
 
 void CmdImuReset::convert() {
-    imu = ntohs(*((uint16_t*) (buffer+6)));
+    static uint16_t u16;
+    memcpy(&u16, buffer+6, sizeof(u16));
+    imu = ntohs(u16);
 }
