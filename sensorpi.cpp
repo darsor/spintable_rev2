@@ -21,7 +21,7 @@ SensorTimePacket* tPacket = nullptr;
 ImuPacket* iPacket = nullptr;
 
 // make the CosmosQueue global (so that all threads can access it)
-CosmosQueue queue(4810, 512, 8);
+CosmosQueue queue(4810, 20000, 8);
 
 std::atomic<bool> camera_state;
 std::condition_variable camera_cv;
@@ -66,7 +66,7 @@ int main() {
     }
 
     // initialize devices
-    Gps gps(5, "/dev/ttyS0", 9600);
+    Gps gps(1, "/dev/ttyS0", 9600);
     Imu imu1(0x6A);
     Imu imu2(0x6B);
 
