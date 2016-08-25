@@ -1,0 +1,37 @@
+COMMAND SENSORS CAMERA_STATE BIG_ENDIAN "Turn camera on or off"
+    PARAMETER       LENGTH      0   32 UINT 8 8 8 "Length of packet in bytes, must be 8"
+    ID_PARAMETER    CMD_ID      32  16 UINT 6 6 6 "ID of command, must be 6"
+	PARAMETER		STATE		48	16 UINT	0 1 1 "ON (1) to turn on, OFF (0) to turn off"
+		STATE ON 1
+		STATE OFF 0
+
+COMMAND SENSORS GYRO_RES BIG_ENDIAN "Change gyroscope full-scale resolution"
+    PARAMETER       LENGTH      0   32 UINT 10 10 10 "Length of packet in bytes, must be 10"
+    ID_PARAMETER    CMD_ID      32  16 UINT  7  7  7 "ID of command, must be 7"
+	PARAMETER		IMU			48	16 UINT	 1  2  1 "Select IMU 1 or 2"
+	PARAMETER		RESOLUTION	64	16 UINT  0  4  0 "0: 125 dps; 1: 245 dps; 2: 500 dps, 3: 1000 dps; 4: 2000 dps"
+		WRITE_CONVERSION gyro_scale.rb
+		STATE "125 dps" 0
+		STATE "245 dps" 1
+		STATE "500 dps" 2
+		STATE "1000 dps" 3
+		STATE "2000 dps" 4
+
+COMMAND SENSORS ACCEL_RES BIG_ENDIAN "Change accelerometer full-scale resolution"
+    PARAMETER       LENGTH      0   32 UINT 10 10 10 "Length of packet in bytes, must be 10"
+    ID_PARAMETER    CMD_ID      32  16 UINT  8  8  8 "ID of command, must be 8"
+	PARAMETER		IMU			48	16 UINT  1  2  1 "Select IMU 1 or 2"
+	PARAMETER		RESOLUTION	64	16 UINT  0  3  0 "0: ±2 g; 1: ±4 g; 2: ±8 g, 3: ±16 g"
+		WRITE_CONVERSION accel_scale.rb
+		STATE "+/- 2 g" 0
+		STATE "+/- 4 g" 1
+		STATE "+/- 8 g" 2
+		STATE "+/- 16 g" 3
+		
+COMMAND SENSORS RESET_IMU BIG_ENDIAN "Reboot an IMU"
+    PARAMETER       LENGTH      0   32 UINT  8  8  8 "Length of packet in bytes, must be 8"
+    ID_PARAMETER    CMD_ID      32  16 UINT 14 14 14 "ID of command, must be 14"
+	PARAMETER		IMU			48	16 UINT	 1  2  1 "Imu 1 or 2"
+		WRITE_CONVERSION reset_imu.rb
+		STATE "IMU 1" 1
+		STATE "IMU 2" 2

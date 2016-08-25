@@ -28,11 +28,20 @@
 *.app
 
 # build folder
-build
+/build
+
 # old spintable project
-spintable
+/spintable
+
 # camera junk
 camera/out.png
-camera/take_picture
-camera/take_picture_hires
-camera/take_picture_test
+
+# COSMOS stuff
+/lib
+/outputs
+/procedures
+/tools
+/Gem*
+/Launch*
+/Rakefile
+/userpath.txt

@@ -1,0 +1,5 @@
+#INTERFACE  NAME            INTERFACE FILE              HOST                                    WRITE   READ    W TIMEOUT   R TIMEOUT   STREAM  ARGUMENTS
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+INTERFACE   ADCS_TCPIP    tcpip_client_interface.rb   spintable2.bluezone.usu.edu  				4811    4811    10.0         10.0       LENGTH  0 32 0 1
+	TARGET ADCS
+	DONT_CONNECT

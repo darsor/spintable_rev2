@@ -1,0 +1,22 @@
+COMMAND MOTOR SET_HOME BIG_ENDIAN "Set motor home"
+    PARAMETER       LENGTH      0   32 UINT 6 6 6 "Length of packet in bytes, must be 6"
+    ID_PARAMETER    CMD_ID      32  16 UINT 9 9 9 "ID of command, must be 9"
+
+COMMAND MOTOR SPEED BIG_ENDIAN "Set motor speed"
+    PARAMETER       LENGTH      0   32 UINT 8    8   8 "Length of packet in bytes, must be 8"
+    ID_PARAMETER    CMD_ID      32  16 UINT 10   10  10 "ID of command, must be 10"
+    PARAMETER       SPEED       48  16 INT  -4095 4095 0 "Speed of motor, between -4095 and 4095"
+
+COMMAND MOTOR ABS_POSITION BIG_ENDIAN "Set motor absolute position in degrees (from home)"
+    PARAMETER       LENGTH      0   32 UINT     10  10  10 "Length of packet in bytes, must be 10"
+    ID_PARAMETER    CMD_ID      32  16 UINT     11  11  11 "ID of command, must be 11"
+    PARAMETER       POSITION    48  32 FLOAT    0   360 0 "Motor position in degrees from 0 to 360"
+
+COMMAND MOTOR REV_POSITION BIG_ENDIAN "Set motor relative position in degrees (from current position)"
+    PARAMETER       LENGTH      0   32 UINT     10   10  10 "Length of packet in bytes, must be 10"
+    ID_PARAMETER    CMD_ID      32  16 UINT     12   12  12 "ID of command, must be 12"
+    PARAMETER       POSITION    48  32 FLOAT    -360 360 0 "Number of degrees to move, from -360 to 360"
+
+COMMAND MOTOR GOTO_INDEX BIG_ENDIAN "Tell the motor to find and go to the nearest index (used for setting absolute home at startup)"
+    PARAMETER       LENGTH      0   32 UINT  6  6  6 "Length of packet in bytes, must be 6"
+    ID_PARAMETER    CMD_ID      32  16 UINT 13 13 13 "ID of command, must be 13"
