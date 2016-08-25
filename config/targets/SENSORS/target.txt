@@ -1,0 +1,8 @@
+REQUIRE systime.rb
+REQUIRE imu_systime.rb
+REQUIRE adc_conversion.rb
+REQUIRE gyro_scale.rb
+REQUIRE accel_scale.rb
+REQUIRE reset_imu.rb
+IGNORE_PARAMETER LENGTH
+IGNORE_PARAMETER CMD_ID

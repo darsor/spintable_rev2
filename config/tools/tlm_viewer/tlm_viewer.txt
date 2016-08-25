@@ -1,0 +1,6 @@
+TARGET SYSTEM
+  SCREEN "overview.txt" 100 20
+    #SHOW_ON_STARTUP
+
+TARGET MOTOR
+	SCREEN "encoder.txt" 100 20
