@@ -1,9 +1,9 @@
-//#define X_res   320
+#define X_res   320
 //#define X_res   1280
-#define X_res     2592 
-//#define Y_res   240
+//#define X_res     2592 
+#define Y_res   240
 //#define Y_res   960
-#define Y_res     1944
+//#define Y_res     1944
 
 #include <raspicam/raspicam.h>
 #include <unistd.h>
