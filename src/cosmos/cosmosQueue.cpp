@@ -47,18 +47,24 @@ void CosmosQueue::deleteFrontCmd() {
 }
 
 void CosmosQueue::push_tlm(Packet* item) {
-    if (tlmCapacity == 0) return;
+    if (tlmCapacity == 0) {
+        delete item;
+        return;
+    }
     tlm_mutex.lock();
     if (tlmQueue.size() >= tlmCapacity) {
+        //printf("deleting packet from full queue\n");
         deleteFrontTlm();
     }
+    //printf("pushing packet with id %d\n", item->id);
     tlmQueue.push(item);
     tlm_mutex.unlock();
 }
 
 bool CosmosQueue::pop_tlm() {
     tlm_mutex.lock();
-    if (tlmCapacity == 0 || tlmQueue.empty()) {
+    //printf("trying to pop from queue of size %d\n", tlmQueue.size());
+    if (tlmCapacity == 0 || tlmQueue.empty() || !connected.load()) {
         tlm_mutex.unlock();
         return false;
     }
@@ -105,6 +111,15 @@ unsigned int CosmosQueue::cmdSize() {
     return cmdQueue.size();
 }
 
+uint16_t CosmosQueue::cmd_front_id() {
+    uint16_t temp;
+    cmd_mutex.lock();
+    if (cmdSize() > 0) temp = cmdQueue.front()->id;
+    else temp = -1;
+    cmd_mutex.unlock();
+    return temp;
+}
+
 void CosmosQueue::connect() {
     cosmos.acceptConnection();
     connected.store(true);
@@ -121,6 +136,7 @@ void CosmosQueue::tlm_thread() {
         connection_mutex.unlock();
         while (connected.load()) {
             while (pop_tlm());
+            //printf("emptied queue\n");
             usleep(10000);
         }
         printf("telemetry connection with COSMOS lost\n");
@@ -129,8 +145,8 @@ void CosmosQueue::tlm_thread() {
 
 void CosmosQueue::cmd_thread() {
     unsigned char buffer[128];
-    uint32_t length, u32;
-    uint16_t id, u16;
+    uint32_t length;
+    uint8_t id;
     Packet* cmd;
     while (true) {
         connection_mutex.lock();
@@ -139,21 +155,27 @@ void CosmosQueue::cmd_thread() {
         while (connected.load()) {
             // receive the first four bytes (the length of the packet);
             if (cosmos.recvPacket(buffer, 4) < 4) {
-                usleep(100000);
-                continue;
+                printf("unable to get 4 bytes\n");
+                connected.store(false);
+                break;
             } else {
-                memcpy(&u32, buffer, sizeof(u32));
-                length = ntohl(u32);
-                if (length <= 4) continue;
+                memcpy(&length, buffer, sizeof(length));
+                printf("received packet of length %u\n", length);
+                if (length < 5 || length > 100) {
+                    printf("packet is too small. Disconnecting...\n");
+                    connected.store(false);
+                    break;
+                }
                 // receive the rest of the packet
                 if (cosmos.recvPacket(buffer+4, length-4) < (int)(length-4)) {
-                    usleep(100000);
-                    continue;
+                    printf("failed to fetch entire packet. Disconnecting...\n");
+                    connected.store(false);
+                    break;
                 }
                 // get the id to know what command it is
-                memcpy(&u16, buffer+4, sizeof(u16));
-                id = ntohs(u16);
-                cmd = new Packet(length, id);
+                memcpy(&id, buffer+4, sizeof(id));
+                printf("id is %d\n", id);
+                cmd = new Packet(length, id, true);
                 memcpy(cmd->buffer, buffer, length);
                 push_cmd(cmd);
             }

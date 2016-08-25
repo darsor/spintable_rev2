@@ -14,7 +14,7 @@ std::mutex pos_mutex;
 std::atomic<bool> index_tripped;
 void indexISR() { index_tripped.store(true); }
 
-DCMotor::DCMotor(int channel, int addr, int freq) : pwm(addr), decoder() {
+DCMotor::DCMotor(int channel, int addr, int freq) try : pwm(addr), decoder() {
     if (channel == 0) {
         pwmPin = 8;
         in2Pin = 9;
@@ -45,7 +45,7 @@ DCMotor::DCMotor(int channel, int addr, int freq) : pwm(addr), decoder() {
     if (wiringPiISR(indexPin, INT_EDGE_RISING, &indexISR) < 0) {
         perror("Unable to setup ISR");
     } else printf("Set up ISR\n");
-}
+} catch (...) {}
 
 DCMotor::~DCMotor() {
     run(RELEASE);
@@ -166,7 +166,7 @@ void DCMotor::gotoIndex() {
         inc /= -2.0;
         if (fabs(inc) < 0.01) break;
     }
-    printf("gotoIndex stopping at %f\n", setPos);
+    //printf("gotoIndex stopping at %f\n", setPos);
 }
 
 // TODO: currently broken, needs to store times/ticks with packet cycle
@@ -236,7 +236,7 @@ void DCMotor::posPID() {
         output = pid.getOutput();
         setSpeed((int) output);
         //setSpeed((int) pid.getOutput());
-        printf("    setPoint: %-.4f, proccessValue: %-.4f, output: %-.4f\n", setPos, getPosition(), output);
+        //printf("    setPoint: %-.4f, proccessValue: %-.4f, output: %-.4f\n", setPos, getPosition(), output);
         usleep(500);
     }
 }
